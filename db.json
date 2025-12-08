@@ -1,25 +1,18 @@
 {
   "students": [
     {
-      "id": 1,
+      "id": "1",
       "name": "Aayush Rawat",
       "section": "A",
       "marks": 92,
       "grade": "A"
     },
     {
-      "id": 2,
+      "id": "2",
       "name": "John Doe",
       "section": "B",
       "marks": 78,
       "grade": "B"
-    },
-    {
-      "id": "0e8d",
-      "name": "Aman",
-      "section": "D",
-      "marks": 90,
-      "grade": "A+"
     }
   ]
 }
