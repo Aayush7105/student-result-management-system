@@ -1,15 +1,31 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { CheckCircle, X, Edit3 } from "lucide-react";
+import { motion } from "framer-motion";
 
-function StudentForm({ mode, initialData, onSubmit, onCancel }) {
+// Tailwind + Framer Motion version of StudentForm
+// Usage: <StudentForm mode="add" initialData={...} onSubmit={fn} onCancel={fn} />
+
+export default function StudentForm({
+  mode = "add",
+  initialData = {},
+  onSubmit,
+  onCancel,
+}) {
   const [name, setName] = useState(initialData?.name || "");
   const [section, setSection] = useState(initialData?.section || "");
-  const [marks, setMarks] = useState(initialData?.marks || "");
+  const [marks, setMarks] = useState(initialData?.marks ?? "");
   const [grade, setGrade] = useState(initialData?.grade || "");
+  const [errors, setErrors] = useState({});
 
-  // ✅ AUTOMATIC GRADE CALCULATION FUNCTION
-  const calculateGrade = (marksValue) => {
-    const m = Number(marksValue);
+  useEffect(() => {
+    // update grade when marks change
+    if (marks === "" || marks === null) return setGrade("");
+    const g = calculateGrade(Number(marks));
+    setGrade(g);
+  }, [marks]);
 
+  const calculateGrade = (m) => {
+    if (Number.isNaN(m)) return "";
     if (m >= 90) return "A+";
     if (m >= 80) return "A";
     if (m >= 70) return "B";
@@ -18,177 +34,156 @@ function StudentForm({ mode, initialData, onSubmit, onCancel }) {
     return "F";
   };
 
-  // ✅ WHEN MARKS CHANGE → AUTO UPDATE GRADE
-  const handleMarksChange = (e) => {
-    const value = e.target.value;
-    setMarks(value);
-
-    const autoGrade = calculateGrade(value);
-    setGrade(autoGrade);
+  const validate = () => {
+    const e = {};
+    if (!name.trim()) e.name = "Name is required";
+    if (!section.trim()) e.section = "Section is required";
+    const m = Number(marks);
+    if (marks === "" || Number.isNaN(m)) e.marks = "Marks must be a number";
+    else if (m < 0 || m > 100) e.marks = "Marks must be between 0 and 100";
+    setErrors(e);
+    return Object.keys(e).length === 0;
   };
 
-  const handleSubmit = () => {
-    if (!name || !section || !marks) {
-      alert("Please fill in all fields");
-      return;
-    }
-
+  const handleSubmit = (e) => {
+    e?.preventDefault?.();
+    if (!validate()) return;
     const student = {
-      name,
-      section,
+      ...initialData,
+      name: name.trim(),
+      section: section.trim(),
       marks: Number(marks),
-      grade, // ✅ auto-assigned
+      grade: grade || calculateGrade(Number(marks)),
     };
-
     onSubmit(student);
   };
 
-  const inputStyle = {
-    width: "100%",
-    padding: "0.75rem",
-    border: "2px solid #e5e7eb",
-    borderRadius: "8px",
-    fontSize: "1rem",
-    transition: "border-color 0.2s",
-    boxSizing: "border-box",
-  };
-
-  const labelStyle = {
-    display: "block",
-    color: "#374151",
-    fontSize: "0.875rem",
-    fontWeight: "600",
-    marginBottom: "0.5rem",
-    textTransform: "uppercase",
-    letterSpacing: "0.05em",
-  };
-
   return (
-    <div
-      style={{
-        maxWidth: "600px",
-        margin: "2rem auto",
-        padding: "2.5rem",
-        backgroundColor: "#fff",
-        borderRadius: "12px",
-        boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-      }}
+    <motion.form
+      onSubmit={handleSubmit}
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.28 }}
+      className="max-w-2xl mx-auto bg-white rounded-2xl shadow-lg overflow-hidden"
     >
-      <h2
-        style={{
-          color: "#1f2937",
-          fontSize: "2rem",
-          fontWeight: "700",
-          marginBottom: "2rem",
-          borderBottom: "3px solid #3b82f6",
-          paddingBottom: "0.75rem",
-        }}
-      >
-        {mode === "edit" ? "Edit Student" : "Add Student"}
-      </h2>
-
-      <div>
-        <div style={{ marginBottom: "1.5rem" }}>
-          <label style={labelStyle}>Name</label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-            style={inputStyle}
-            onFocus={(e) => (e.target.style.borderColor = "#3b82f6")}
-            onBlur={(e) => (e.target.style.borderColor = "#e5e7eb")}
-          />
+      <div className="p-6 bg-gradient-to-r from-slate-50 to-white border-b border-slate-100 flex items-center gap-4">
+        <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-indigo-500 to-sky-500 flex items-center justify-center text-white font-bold text-lg shadow-md">
+          {mode === "edit" ? (
+            <Edit3 className="w-5 h-5" />
+          ) : (
+            <CheckCircle className="w-5 h-5" />
+          )}
         </div>
 
-        <div style={{ marginBottom: "1.5rem" }}>
-          <label style={labelStyle}>Section</label>
-          <input
-            type="text"
-            value={section}
-            onChange={(e) => setSection(e.target.value)}
-            required
-            style={inputStyle}
-            onFocus={(e) => (e.target.style.borderColor = "#3b82f6")}
-            onBlur={(e) => (e.target.style.borderColor = "#e5e7eb")}
-          />
-        </div>
-
-        <div style={{ marginBottom: "1.5rem" }}>
-          <label style={labelStyle}>Marks (0-100)</label>
-          <input
-            type="number"
-            value={marks}
-            onChange={handleMarksChange} // ✅ auto grade trigger
-            min="0"
-            max="100"
-            required
-            style={inputStyle}
-            onFocus={(e) => (e.target.style.borderColor = "#3b82f6")}
-            onBlur={(e) => (e.target.style.borderColor = "#e5e7eb")}
-          />
-        </div>
-
-        <div style={{ marginBottom: "2rem" }}>
-          <label style={labelStyle}>Grade (Auto-calculated)</label>
-          <input
-            type="text"
-            value={grade}
-            readOnly // ✅ user CANNOT edit manually
-            style={{
-              ...inputStyle,
-              backgroundColor: "#f3f4f6",
-              cursor: "not-allowed",
-              fontWeight: "600",
-              color: "#1f2937",
-            }}
-          />
-        </div>
-
-        <div style={{ display: "flex", gap: "1rem" }}>
-          <button
-            onClick={handleSubmit}
-            style={{
-              flex: 1,
-              padding: "0.875rem",
-              backgroundColor: "#3b82f6",
-              color: "white",
-              border: "none",
-              borderRadius: "8px",
-              fontSize: "1rem",
-              fontWeight: "600",
-              cursor: "pointer",
-              transition: "background-color 0.2s",
-            }}
-            onMouseOver={(e) => (e.target.style.backgroundColor = "#2563eb")}
-            onMouseOut={(e) => (e.target.style.backgroundColor = "#3b82f6")}
-          >
-            {mode === "edit" ? "Save Changes" : "Add Student"}
-          </button>
-
-          <button
-            onClick={onCancel}
-            style={{
-              flex: 1,
-              padding: "0.875rem",
-              backgroundColor: "#6b7280",
-              color: "white",
-              border: "none",
-              borderRadius: "8px",
-              fontSize: "1rem",
-              fontWeight: "600",
-              cursor: "pointer",
-              transition: "background-color 0.2s",
-            }}
-            onMouseOver={(e) => (e.target.style.backgroundColor = "#4b5563")}
-            onMouseOut={(e) => (e.target.style.backgroundColor = "#6b7280")}
-          >
-            Cancel
-          </button>
+        <div>
+          <h3 className="text-lg font-extrabold text-slate-900">
+            {mode === "edit" ? "Edit Student" : "Add Student"}
+          </h3>
+          <p className="text-sm text-slate-500">
+            Quickly add or update student details. Grade is auto-calculated from
+            marks.
+          </p>
         </div>
       </div>
-    </div>
+
+      <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide">
+            Name
+          </label>
+          <input
+            className={`mt-2 w-full p-3 rounded-lg border ${
+              errors.name ? "border-rose-400" : "border-slate-200"
+            } focus:outline-none focus:ring-2 focus:ring-sky-300`}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="e.g. Rahul Sharma"
+          />
+          {errors.name && (
+            <p className="text-rose-500 text-xs mt-1">{errors.name}</p>
+          )}
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide">
+            Section
+          </label>
+          <input
+            className={`mt-2 w-full p-3 rounded-lg border ${
+              errors.section ? "border-rose-400" : "border-slate-200"
+            } focus:outline-none focus:ring-2 focus:ring-sky-300`}
+            value={section}
+            onChange={(e) => setSection(e.target.value)}
+            placeholder="e.g. A1"
+          />
+          {errors.section && (
+            <p className="text-rose-500 text-xs mt-1">{errors.section}</p>
+          )}
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide">
+            Marks (0 - 100)
+          </label>
+          <input
+            type="number"
+            min="0"
+            max="100"
+            className={`mt-2 w-full p-3 rounded-lg border ${
+              errors.marks ? "border-rose-400" : "border-slate-200"
+            } focus:outline-none focus:ring-2 focus:ring-sky-300`}
+            value={marks}
+            onChange={(e) => setMarks(e.target.value)}
+            placeholder="e.g. 85"
+          />
+          {errors.marks && (
+            <p className="text-rose-500 text-xs mt-1">{errors.marks}</p>
+          )}
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide">
+            Grade (auto)
+          </label>
+          <div className="mt-2 flex items-center gap-3">
+            <input
+              readOnly
+              value={grade}
+              className="flex-1 p-3 rounded-lg bg-slate-50 border border-slate-100 font-semibold"
+            />
+            <div
+              className={`px-3 py-2 rounded-md text-sm font-semibold ${
+                grade === "A+" || grade === "A"
+                  ? "bg-green-100 text-green-800"
+                  : grade === "B"
+                  ? "bg-amber-100 text-amber-800"
+                  : grade === "C" || grade === "D"
+                  ? "bg-rose-100 text-rose-800"
+                  : "bg-slate-100 text-slate-700"
+              }`}
+            >
+              {grade || "--"}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="p-6 border-t border-slate-100 bg-white flex flex-col sm:flex-row gap-3">
+        <button
+          type="submit"
+          className="flex-1 py-3 rounded-lg bg-sky-600 hover:bg-sky-700 text-white font-semibold shadow-sm transition"
+        >
+          {mode === "edit" ? "Save Changes" : "Add Student"}
+        </button>
+
+        <button
+          type="button"
+          onClick={onCancel}
+          className="flex-1 py-3 rounded-lg border border-slate-200 text-slate-700 font-semibold hover:bg-slate-50 transition"
+        >
+          Cancel
+        </button>
+      </div>
+    </motion.form>
   );
 }
-
-export default StudentForm;
