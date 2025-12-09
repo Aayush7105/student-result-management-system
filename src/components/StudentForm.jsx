@@ -1,9 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { CheckCircle, X, Edit3 } from "lucide-react";
-import { motion } from "framer-motion";
-
-// Tailwind + Framer Motion version of StudentForm
-// Usage: <StudentForm mode="add" initialData={...} onSubmit={fn} onCancel={fn} />
+import { CheckCircle, Edit3 } from "lucide-react";
 
 export default function StudentForm({
   mode = "add",
@@ -13,12 +9,14 @@ export default function StudentForm({
 }) {
   const [name, setName] = useState(initialData?.name || "");
   const [section, setSection] = useState(initialData?.section || "");
-  const [marks, setMarks] = useState(initialData?.marks ?? "");
+  const [marks, setMarks] = useState(
+    initialData?.marks !== undefined ? String(initialData.marks) : ""
+  );
   const [grade, setGrade] = useState(initialData?.grade || "");
+  const [notes, setNotes] = useState(initialData?.notes || "");
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
-    // update grade when marks change
     if (marks === "" || marks === null) return setGrade("");
     const g = calculateGrade(Number(marks));
     setGrade(g);
@@ -38,140 +36,186 @@ export default function StudentForm({
     const e = {};
     if (!name.trim()) e.name = "Name is required";
     if (!section.trim()) e.section = "Section is required";
+
     const m = Number(marks);
     if (marks === "" || Number.isNaN(m)) e.marks = "Marks must be a number";
     else if (m < 0 || m > 100) e.marks = "Marks must be between 0 and 100";
+
     setErrors(e);
     return Object.keys(e).length === 0;
   };
 
+  const card = {
+    maxWidth: "650px",
+    margin: "2rem auto",
+    padding: "2rem",
+    background: "#fff",
+    borderRadius: "14px",
+    boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+  };
+
+  const titleBar = {
+    display: "flex",
+    alignItems: "center",
+    gap: "1rem",
+    marginBottom: "1.5rem",
+    paddingBottom: "1rem",
+    borderBottom: "2px solid #e5e7eb",
+  };
+
+  const input = (error) => ({
+    width: "100%",
+    padding: "0.8rem",
+    border: `2px solid ${error ? "#f87171" : "#d1d5db"}`,
+    borderRadius: "8px",
+    fontSize: "1rem",
+    marginTop: "0.4rem",
+    transition: "0.2s",
+  });
+
+  const label = {
+    fontSize: "0.9rem",
+    fontWeight: "600",
+    color: "#374151",
+    marginTop: "1rem",
+    textTransform: "uppercase",
+    letterSpacing: "0.04em",
+  };
+
+  const btn = (bg, hover) => ({
+    padding: "0.9rem",
+    borderRadius: "8px",
+    border: "none",
+    width: "100%",
+    fontSize: "1rem",
+    cursor: "pointer",
+    color: "white",
+    background: bg,
+    transition: "0.2s",
+  });
+
   const handleSubmit = (e) => {
     e?.preventDefault?.();
     if (!validate()) return;
+
     const student = {
       ...initialData,
-      name: name.trim(),
-      section: section.trim(),
+      name,
+      section,
       marks: Number(marks),
       grade: grade || calculateGrade(Number(marks)),
+      notes: notes.trim() || undefined,
     };
     onSubmit(student);
   };
 
   return (
-    <motion.form
-      onSubmit={handleSubmit}
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.28 }}
-      className="max-w-2xl mx-auto bg-white rounded-2xl shadow-lg overflow-hidden"
-    >
-      <div className="p-6 bg-gradient-to-r from-slate-50 to-white border-b border-slate-100 flex items-center gap-4">
-        <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-indigo-500 to-sky-500 flex items-center justify-center text-white font-bold text-lg shadow-md">
-          {mode === "edit" ? (
-            <Edit3 className="w-5 h-5" />
-          ) : (
-            <CheckCircle className="w-5 h-5" />
-          )}
+    <form style={card} onSubmit={handleSubmit}>
+      {/* Header */}
+      <div style={titleBar}>
+        <div
+          style={{
+            width: "50px",
+            height: "50px",
+            background:
+              "linear-gradient(135deg, rgba(79,70,229), rgba(14,165,233))",
+            color: "white",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            borderRadius: "10px",
+          }}
+        >
+          {mode === "edit" ? <Edit3 size={26} /> : <CheckCircle size={26} />}
         </div>
 
         <div>
-          <h3 className="text-lg font-extrabold text-slate-900">
+          <h2 style={{ margin: 0, fontSize: "1.4rem", fontWeight: "700" }}>
             {mode === "edit" ? "Edit Student" : "Add Student"}
-          </h3>
-          <p className="text-sm text-slate-500">
-            Quickly add or update student details. Grade is auto-calculated from
-            marks.
+          </h2>
+          <p style={{ fontSize: "0.9rem", color: "#6b7280" }}>
+            An improved form with clean styling and auto-grade calculation.
           </p>
         </div>
       </div>
 
-      <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide">
-            Name
-          </label>
-          <input
-            className={`mt-2 w-full p-3 rounded-lg border ${
-              errors.name ? "border-rose-400" : "border-slate-200"
-            } focus:outline-none focus:ring-2 focus:ring-sky-300`}
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="e.g. Rahul Sharma"
-          />
-          {errors.name && (
-            <p className="text-rose-500 text-xs mt-1">{errors.name}</p>
-          )}
-        </div>
+      {/* Inputs */}
+      <label style={label}>Full Name</label>
+      <input
+        style={input(errors.name)}
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        placeholder="e.g. Rahul Sharma"
+      />
+      {errors.name && (
+        <p style={{ color: "red", fontSize: "0.8rem" }}>{errors.name}</p>
+      )}
 
-        <div>
-          <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide">
-            Section
-          </label>
-          <input
-            className={`mt-2 w-full p-3 rounded-lg border ${
-              errors.section ? "border-rose-400" : "border-slate-200"
-            } focus:outline-none focus:ring-2 focus:ring-sky-300`}
-            value={section}
-            onChange={(e) => setSection(e.target.value)}
-            placeholder="e.g. A1"
-          />
-          {errors.section && (
-            <p className="text-rose-500 text-xs mt-1">{errors.section}</p>
-          )}
-        </div>
+      <label style={label}>Section</label>
+      <input
+        style={input(errors.section)}
+        value={section}
+        onChange={(e) => setSection(e.target.value)}
+        placeholder="e.g. A1"
+      />
+      {errors.section && (
+        <p style={{ color: "red", fontSize: "0.8rem" }}>{errors.section}</p>
+      )}
 
-        <div>
-          <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide">
-            Marks (0 - 100)
-          </label>
-          <input
-            type="number"
-            min="0"
-            max="100"
-            className={`mt-2 w-full p-3 rounded-lg border ${
-              errors.marks ? "border-rose-400" : "border-slate-200"
-            } focus:outline-none focus:ring-2 focus:ring-sky-300`}
-            value={marks}
-            onChange={(e) => setMarks(e.target.value)}
-            placeholder="e.g. 85"
-          />
-          {errors.marks && (
-            <p className="text-rose-500 text-xs mt-1">{errors.marks}</p>
-          )}
-        </div>
+      <label style={label}>Marks (0 - 100)</label>
+      <input
+        type="number"
+        min="0"
+        max="100"
+        style={input(errors.marks)}
+        value={marks}
+        onChange={(e) => setMarks(e.target.value)}
+        placeholder="e.g. 85"
+      />
+      {errors.marks && (
+        <p style={{ color: "red", fontSize: "0.8rem" }}>{errors.marks}</p>
+      )}
 
-        <div>
-          <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide">
-            Grade (auto)
-          </label>
-          <div className="mt-2 flex items-center gap-3">
-            <input
-              readOnly
-              value={grade}
-              className="flex-1 p-3 rounded-lg bg-slate-50 border border-slate-100 font-semibold"
-            />
-            <div
-              className={`px-3 py-2 rounded-md text-sm font-semibold ${
-                grade === "A+" || grade === "A"
-                  ? "bg-green-100 text-green-800"
-                  : grade === "B"
-                  ? "bg-amber-100 text-amber-800"
-                  : grade === "C" || grade === "D"
-                  ? "bg-rose-100 text-rose-800"
-                  : "bg-slate-100 text-slate-700"
-              }`}
-            >
-              {grade || "--"}
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Grade box */}
+      <label style={label}>Grade (Auto)</label>
+      <input
+        readOnly
+        value={grade}
+        style={{
+          ...input(false),
+          background: "#f3f4f6",
+          fontWeight: "700",
+          cursor: "not-allowed",
+        }}
+      />
 
-      <div className="p-6 border-t border-slate-100 bg-white flex flex-col sm:flex-row gap-3">
+      {/* Notes */}
+      <label style={label}>Notes (optional)</label>
+      <textarea
+        rows={4}
+        value={notes}
+        onChange={(e) => setNotes(e.target.value)}
+        style={{
+          ...input(false),
+          resize: "vertical",
+          height: "100px",
+        }}
+        placeholder="Add any teacher notes or comments..."
+      />
+
+      {/* Buttons */}
+      <div
+        style={{
+          marginTop: "1.5rem",
+          display: "flex",
+          gap: "1rem",
+        }}
+      >
         <button
           type="submit"
-          className="flex-1 py-3 rounded-lg bg-sky-600 hover:bg-sky-700 text-white font-semibold shadow-sm transition"
+          style={btn("#0ea5e9", "#0369a1")}
+          onMouseOver={(e) => (e.target.style.background = "#0369a1")}
+          onMouseOut={(e) => (e.target.style.background = "#0ea5e9")}
         >
           {mode === "edit" ? "Save Changes" : "Add Student"}
         </button>
@@ -179,11 +223,13 @@ export default function StudentForm({
         <button
           type="button"
           onClick={onCancel}
-          className="flex-1 py-3 rounded-lg border border-slate-200 text-slate-700 font-semibold hover:bg-slate-50 transition"
+          style={btn("#6b7280", "#4b5563")}
+          onMouseOver={(e) => (e.target.style.background = "#4b5563")}
+          onMouseOut={(e) => (e.target.style.background = "#6b7280")}
         >
           Cancel
         </button>
       </div>
-    </motion.form>
+    </form>
   );
 }
