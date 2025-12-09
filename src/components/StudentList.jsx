@@ -20,6 +20,7 @@ function StudentList({
     fontWeight: "500",
     cursor: "pointer",
     transition: "all 0.2s",
+    fontFamily: "Inter, Arial, sans-serif",
   };
 
   return (
@@ -31,6 +32,7 @@ function StudentList({
         backgroundColor: "#fff",
         borderRadius: "12px",
         boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+        fontFamily: "Inter, Arial, sans-serif", // ★ APPLY SANS-SERIF HERE
       }}
     >
       <h2
@@ -56,11 +58,7 @@ function StudentList({
       >
         <button
           onClick={onLoadStudents}
-          style={{
-            ...buttonStyle,
-            backgroundColor: "#3b82f6",
-            color: "white",
-          }}
+          style={{ ...buttonStyle, backgroundColor: "#3b82f6", color: "white" }}
           onMouseOver={(e) => {
             e.target.style.backgroundColor = "#2563eb";
             e.target.style.transform = "translateY(-2px)";
@@ -72,13 +70,10 @@ function StudentList({
         >
           Load Students
         </button>
+
         <button
           onClick={onAddStudent}
-          style={{
-            ...buttonStyle,
-            backgroundColor: "#10b981",
-            color: "white",
-          }}
+          style={{ ...buttonStyle, backgroundColor: "#10b981", color: "white" }}
           onMouseOver={(e) => {
             e.target.style.backgroundColor = "#059669";
             e.target.style.transform = "translateY(-2px)";
@@ -102,7 +97,14 @@ function StudentList({
             border: "2px dashed #d1d5db",
           }}
         >
-          <p style={{ color: "#6b7280", fontSize: "1.1rem", margin: 0 }}>
+          <p
+            style={{
+              color: "#6b7280",
+              fontSize: "1.1rem",
+              margin: 0,
+              fontFamily: "Inter, Arial, sans-serif",
+            }}
+          >
             No students loaded. Click "Load Students" to begin.
           </p>
         </div>
@@ -114,6 +116,7 @@ function StudentList({
               borderCollapse: "separate",
               borderSpacing: 0,
               fontSize: "0.95rem",
+              fontFamily: "Inter, Arial, sans-serif",
             }}
           >
             <thead>
@@ -164,6 +167,7 @@ function StudentList({
                   >
                     {index + 1}
                   </td>
+
                   <td
                     style={{
                       padding: "1rem",
@@ -173,12 +177,15 @@ function StudentList({
                   >
                     {stu.name}
                   </td>
+
                   <td style={{ padding: "1rem", color: "#4b5563" }}>
                     {stu.section}
                   </td>
+
                   <td style={{ padding: "1rem", color: "#4b5563" }}>
                     {stu.marks}
                   </td>
+
                   <td style={{ padding: "1rem" }}>
                     <span
                       style={{
@@ -205,6 +212,7 @@ function StudentList({
                       {stu.grade}
                     </span>
                   </td>
+
                   <td style={{ padding: "1rem" }}>
                     <div
                       style={{
@@ -213,17 +221,16 @@ function StudentList({
                         flexWrap: "wrap",
                       }}
                     >
+                      {/* VIEW BUTTON */}
                       <button
                         onClick={() => onViewDetails(stu)}
                         style={{
+                          ...buttonStyle,
                           padding: "0.5rem 0.75rem",
                           backgroundColor: "#3b82f6",
                           color: "white",
-                          border: "none",
                           borderRadius: "6px",
                           fontSize: "0.875rem",
-                          cursor: "pointer",
-                          fontWeight: "500",
                         }}
                         onMouseOver={(e) =>
                           (e.target.style.backgroundColor = "#2563eb")
@@ -235,17 +242,16 @@ function StudentList({
                         View
                       </button>
 
+                      {/* EDIT BUTTON */}
                       <button
                         onClick={() => onEditStudent(stu)}
                         style={{
+                          ...buttonStyle,
                           padding: "0.5rem 0.75rem",
                           backgroundColor: "#f59e0b",
                           color: "white",
-                          border: "none",
                           borderRadius: "6px",
                           fontSize: "0.875rem",
-                          cursor: "pointer",
-                          fontWeight: "500",
                         }}
                         onMouseOver={(e) =>
                           (e.target.style.backgroundColor = "#d97706")
@@ -257,17 +263,16 @@ function StudentList({
                         Edit
                       </button>
 
+                      {/* DELETE BUTTON */}
                       <button
                         onClick={() => onDeleteStudent(stu.id)}
                         style={{
+                          ...buttonStyle,
                           padding: "0.5rem 0.75rem",
                           backgroundColor: "#ef4444",
                           color: "white",
-                          border: "none",
                           borderRadius: "6px",
                           fontSize: "0.875rem",
-                          cursor: "pointer",
-                          fontWeight: "500",
                         }}
                         onMouseOver={(e) =>
                           (e.target.style.backgroundColor = "#dc2626")
