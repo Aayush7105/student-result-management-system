@@ -91,7 +91,7 @@ function App() {
 
   return (
     <div style={{ padding: "1rem" }}>
-      <h1>Student Result App</h1>
+      <h1>Student App</h1>
       <hr />
 
       {currentView === "list" && (
